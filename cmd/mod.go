@@ -11,13 +11,9 @@ func Run() {
 	app := &cli.App{
 		Name:        "forge-previewer",
 		Description: "Create preview deployments for pull request with Laravel Forge.",
+		Version:     GetCurrentVersion(),
 		Commands: []*cli.Command{
-			{
-				Name:    "deploy",
-				Aliases: []string{"d"},
-				Usage:   "Deploy your pull request to Laravel Forge.",
-				Action:  Deploy,
-			},
+			GetDeployCommand(),
 		},
 	}
 
