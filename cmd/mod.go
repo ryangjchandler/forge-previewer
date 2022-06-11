@@ -9,7 +9,8 @@ import (
 
 func Run() {
 	app := &cli.App{
-		Name: "forge-previewer",
+		Name:        "forge-previewer",
+		Description: "Create preview deployments for pull request with Laravel Forge.",
 		Commands: []*cli.Command{
 			{
 				Name:    "deploy",
