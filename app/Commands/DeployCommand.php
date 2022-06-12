@@ -43,6 +43,9 @@ class DeployCommand extends Command
         $site = $this->findOrCreateSite($server);
 
         $this->createDatabase($server, $site);
+
+        // TODO: Generate an SSL certificate.
+        // TODO: Execute any extra commands, i.e. database seeding.
     }
 
     protected function createDatabase(Server $server, Site $site)
