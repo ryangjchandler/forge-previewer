@@ -1,5 +1,8 @@
 <?php
 
+use Illuminate\Console\Scheduling\ScheduleListCommand;
+use Illuminate\Console\Scheduling\ScheduleRunCommand;
+
 return [
 
     /*
@@ -76,7 +79,8 @@ return [
     */
 
     'remove' => [
-        // ..
+        ScheduleListCommand::class,
+        ScheduleRunCommand::class,
     ],
 
 ];
