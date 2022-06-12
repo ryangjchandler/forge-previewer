@@ -23,7 +23,8 @@ class DeployCommand extends Command
         {--R|repo= : The name of the repository being deployed.}
         {--B|branch= : The name of the branch being deployed.}
         {--D|domain= : The domain you\'d like to use for deployments.}
-        {--P|php-version=php81 : The version of PHP the site should use, e.g. php81, php80, ...}';
+        {--P|php-version=php81 : The version of PHP the site should use, e.g. php81, php80, ...}
+        {--C|command=* : A command you would like to execute on the site, e.g. php artisan db:seed.}';
 
     protected $description = 'Deploy a branch / pull request to Laravel Forge.';
 
@@ -42,6 +43,16 @@ class DeployCommand extends Command
         $site = $this->findOrCreateSite($server);
 
         $this->maybeCreateDatabase($server, $site);
+
+        foreach ($this->option('command') as $i => $command) {
+            if ($i === 0) {
+                $this->information('Executing site command(s)');
+            }
+
+            $forge->executeSiteCommand($server->id, $site->id, [
+                'command' => $command,
+            ]);
+        }
     }
 
     protected function maybeCreateDatabase(Server $server, Site $site)
