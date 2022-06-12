@@ -6,7 +6,6 @@ use Exception;
 use Laravel\Forge\Forge;
 use Illuminate\Support\Str;
 use Laravel\Forge\Resources\Site;
-use App\Commands\Concerns\CanFail;
 use Laravel\Forge\Resources\Server;
 use App\Commands\Concerns\HandlesOutput;
 use App\Commands\Concerns\InteractsWithEnv;
