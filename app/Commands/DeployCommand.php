@@ -123,6 +123,16 @@ class DeployCommand extends Command
 
         $site->deploySite();
 
+        $this->information('Generating SSL certificate');
+
+        try {
+            $this->forge->obtainLetsEncryptCertificate($server->id, $site->id, [
+                'domains' => [$this->generateSiteDomain()],
+            ]);
+        } catch (Exception $e) {
+            dd($e);
+        }
+
         return $site;
     }
 
