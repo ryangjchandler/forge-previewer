@@ -42,14 +42,24 @@ class DeployCommand extends Command
 
         $site = $this->findOrCreateSite($server);
 
-        $this->createDatabase($server, $site);
+        $this->maybeCreateDatabase($server, $site);
 
         // TODO: Generate an SSL certificate.
         // TODO: Execute any extra commands, i.e. database seeding.
     }
 
-    protected function createDatabase(Server $server, Site $site)
+    protected function maybeCreateDatabase(Server $server, Site $site)
     {
+        $name = $this->getDatabaseName();
+
+        foreach ($this->forge->databases($server->id) as $database) {
+            if ($database->name === $name) {
+                $this->information('Database already exists.');
+
+                return;
+            }
+        }
+
         $this->information('Creating database');
 
         $this->forge->createDatabase($server->id, [
@@ -93,6 +103,7 @@ class DeployCommand extends Command
             'domain' => $domain,
             'project_type' => 'php',
             'php_version' => $this->option('php-version'),
+            'directory' => '/public'
         ]);
 
         $this->information('Installing Git repository');
@@ -107,6 +118,10 @@ class DeployCommand extends Command
         $this->information('Enabling quick deploy');
 
         $site->enableQuickDeploy();
+
+        $this->information('Deploying');
+
+        $site->deploySite();
 
         return $site;
     }
