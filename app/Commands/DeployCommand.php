@@ -24,7 +24,8 @@ class DeployCommand extends Command
         {--B|branch= : The name of the branch being deployed.}
         {--D|domain= : The domain you\'d like to use for deployments.}
         {--P|php-version=php81 : The version of PHP the site should use, e.g. php81, php80, ...}
-        {--C|command=* : A command you would like to execute on the site, e.g. php artisan db:seed.}';
+        {--C|command=* : A command you would like to execute on the site, e.g. php artisan db:seed.}
+        {--N|no-quick-deploy : Create your site without "Quick Deploy".';
 
     protected $description = 'Deploy a branch / pull request to Laravel Forge.';
 
@@ -122,9 +123,11 @@ class DeployCommand extends Command
             'composer' => true,
         ]);
 
-        $this->information('Enabling quick deploy');
+        if (! $this->option('no-quick-deploy')) {
+            $this->information('Enabling quick deploy');
 
-        $site->enableQuickDeploy();
+            $site->enableQuickDeploy();
+        }
 
         $this->information('Deploying');
 
