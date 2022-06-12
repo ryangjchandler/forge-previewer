@@ -125,13 +125,9 @@ class DeployCommand extends Command
 
         $this->information('Generating SSL certificate');
 
-        try {
-            $this->forge->obtainLetsEncryptCertificate($server->id, $site->id, [
-                'domains' => [$this->generateSiteDomain()],
-            ]);
-        } catch (Exception $e) {
-            dd($e);
-        }
+        $this->forge->obtainLetsEncryptCertificate($server->id, $site->id, [
+            'domains' => [$this->generateSiteDomain()],
+        ]);
 
         return $site;
     }
