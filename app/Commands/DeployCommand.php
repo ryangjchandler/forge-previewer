@@ -24,8 +24,7 @@ class DeployCommand extends Command
         {--R|repo= : The name of the repository being deployed.}
         {--B|branch= : The name of the branch being deployed.}
         {--D|domain= : The domain you\'d like to use for deployments.}
-        {--P|php-version=php81 : The version of PHP the site should use, e.g. php81, php80, ...}
-        {--C|composer : Install Composer dependencies on the Forge site.}';
+        {--P|php-version=php81 : The version of PHP the site should use, e.g. php81, php80, ...}';
 
     protected $description = 'Deploy a branch / pull request to Laravel Forge.';
 
@@ -42,6 +41,34 @@ class DeployCommand extends Command
         }
 
         $site = $this->findOrCreateSite($server);
+
+        $this->createDatabase($server, $site);
+    }
+
+    protected function createDatabase(Server $server, Site $site)
+    {
+        $this->information('Creating database');
+
+        $this->forge->createDatabase($server->id, [
+            'name' => $this->getDatabaseName(),
+            'user' => $this->getDatabaseUserName(),
+            'password' => $this->getDatabasePassword(),
+        ]);
+
+        $this->information('Updating site environment variables');
+
+        $env = $this->forge->siteEnvironmentFile($server->id, $site->id);
+        $env = preg_replace([
+            "/DB_DATABASE=.*/",
+            "/DB_USERNAME=.*/",
+            "/DB_PASSWORD=.*/",
+        ], [
+            "DB_DATABASE={$this->getDatabaseName()}",
+            "DB_USERNAME={$this->getDatabaseUserName()}",
+            "DB_PASSWORD={$this->getDatabasePassword()}"
+        ], $env);
+
+        $this->forge->updateSiteEnvironmentFile($server->id, $site->id, $env);
     }
 
     protected function findOrCreateSite(Server $server): Site
@@ -71,7 +98,7 @@ class DeployCommand extends Command
             'provider' => $this->option('provider'),
             'repository' => $this->getRepoName(),
             'branch' => $this->getBranchName(),
-            'composer' => $this->option('composer'),
+            'composer' => true,
         ]);
 
         $this->information('Enabling quick deploy');
