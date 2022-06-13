@@ -25,6 +25,7 @@ class DeployCommand extends Command
         {--domain= : The domain you\'d like to use for deployments.}
         {--php-version=php81 : The version of PHP the site should use, e.g. php81, php80, ...}
         {--command=* : A command you would like to execute on the site, e.g. php artisan db:seed.}
+        {--scheduler : Setup a cronjob to run Laravel\'s scheduler.}
         {--no-quick-deploy : Create your site without "Quick Deploy".}
         {--no-deploy : Avoid deploying the site.}';
 
@@ -59,6 +60,37 @@ class DeployCommand extends Command
                 'command' => $command,
             ]);
         }
+
+        $this->maybeCreateScheduledJob($server);
+    }
+
+    protected function maybeCreateScheduledJob(Server $server)
+    {
+        if (! $this->option('scheduler')) {
+            return;
+        }
+
+        $command = $this->buildScheduledJobCommand();
+
+        foreach ($this->forge->jobs($server->id) as $job) {
+            if ($job->command === $command) {
+                $this->information('Scheduler job already exists');
+                return;
+            }
+        }
+
+        $this->information('Creating scheduler job');
+
+        $this->forge->createJob($server->id, [
+            'command' => $command,
+            'frequency' => 'minutely',
+            'user' => 'forge',
+        ]);
+    }
+
+    protected function buildScheduledJobCommand(): string
+    {
+        return sprintf("php /home/forge/%s/artisan schedule:run", $this->generateSiteDomain());
     }
 
     protected function maybeCreateDatabase(Server $server, Site $site)
