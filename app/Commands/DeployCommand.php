@@ -29,7 +29,7 @@ class DeployCommand extends Command
         {--domain= : The domain you\'d like to use for deployments.}
         {--php-version=php81 : The version of PHP the site should use, e.g. php81, php80, ...}
         {--command=* : A command you would like to execute on the site, e.g. php artisan db:seed.}
-        {--env=* : The colon-separated name and value that will be added/updated in the site\'s environment, e.g. "MY_API_KEY:my_api_key_value".}
+        {--edit-env=* : The colon-separated name and value that will be added/updated in the site\'s environment, e.g. "MY_API_KEY:my_api_key_value".}
         {--scheduler : Setup a cronjob to run Laravel\'s scheduler.}
         {--no-quick-deploy : Create your site without "Quick Deploy".}
         {--no-deploy : Avoid deploying the site.}';
@@ -52,12 +52,12 @@ class DeployCommand extends Command
 
         $this->maybeCreateDatabase($server, $site);
 
-        if ($this->option('env')) {
+        if ($this->option('edit-env')) {
             $this->information('Updating environment variables');
 
             $envSource = $forge->siteEnvironmentFile($server->id, $site->id);
 
-            foreach ($this->option('env') as $env) {
+            foreach ($this->option('edit-env') as $env) {
                 [$key, $value] = explode(':', $env, 1);
 
                 $envSource = $this->updateEnvVariable($key, $value, $envSource);

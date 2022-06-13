@@ -57,6 +57,7 @@ Options:
     --domain[=DOMAIN]            The domain you'd like to use for deployments, e.g. mydomain.com.
     --php-version[=PHP-VERSION]  The version of PHP the site should use, e.g. php81, php80, ... [default: "php81"]
     --command[=COMMAND]          A command you would like to execute on the site, e.g. php artisan db:seed. (multiple values allowed)
+    --edit-env[=EDIT-ENV]        The colon-separated name and value that will be added/updated in the site's environment, e.g. "MY_API_KEY:my_api_key_value". (multiple values allowed)
     --scheduler                  Setup a cronjob to run Laravel's scheduler.
     --no-quick-deploy            Create your site without "Quick Deploy".
     --no-deploy                  Avoid deploying the site.
