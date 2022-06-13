@@ -25,7 +25,8 @@ class DeployCommand extends Command
         {--D|domain= : The domain you\'d like to use for deployments.}
         {--P|php-version=php81 : The version of PHP the site should use, e.g. php81, php80, ...}
         {--C|command=* : A command you would like to execute on the site, e.g. php artisan db:seed.}
-        {--N|no-quick-deploy : Create your site without "Quick Deploy".';
+        {--N|no-quick-deploy : Create your site without "Quick Deploy".}
+        {--O|no-deploy : Avoid deploying the site.}';
 
     protected $description = 'Deploy a branch / pull request to Laravel Forge.';
 
@@ -44,6 +45,10 @@ class DeployCommand extends Command
         $site = $this->findOrCreateSite($server);
 
         $this->maybeCreateDatabase($server, $site);
+
+        $this->information('Deploying');
+
+        $site->deploySite();
 
         foreach ($this->option('command') as $i => $command) {
             if ($i === 0) {
@@ -128,10 +133,6 @@ class DeployCommand extends Command
 
             $site->enableQuickDeploy();
         }
-
-        $this->information('Deploying');
-
-        $site->deploySite();
 
         $this->information('Generating SSL certificate');
 
