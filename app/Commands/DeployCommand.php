@@ -62,6 +62,8 @@ class DeployCommand extends Command
 
                 $envSource = $this->updateEnvVariable($key, $value, $envSource);
             }
+
+            $forge->updateSiteEnvironmentFile($server->id, $site->id, $envSource);
         }
 
         $this->information('Deploying');
@@ -86,7 +88,7 @@ class DeployCommand extends Command
         if (! str_contains($source, "{$name}=")) {
             $source .= PHP_EOL . "{$name}={$value}";
         } else {
-            $source .= preg_replace("/^{$name}=[^\r\n]*/m", "{$name}={$value}", $source, 1);
+            $source = preg_replace("/^{$name}=[^\r\n]*/m", "{$name}={$value}", $source, 1);
         }
 
         return $source;
