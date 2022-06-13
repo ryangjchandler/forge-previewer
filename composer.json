@@ -1,18 +1,17 @@
 {
-    "name": "laravel-zero/laravel-zero",
-    "description": "The Laravel Zero Framework.",
-    "keywords": ["framework", "laravel", "laravel zero", "console", "cli"],
-    "homepage": "https://laravel-zero.com",
+    "name": "ryangjchandler/forge-previewer",
+    "description": "Create preview deployments for pull request with Laravel Forge.",
+    "keywords": ["forge", "laravel", "preview-deploy"],
     "type": "project",
     "license": "MIT",
     "support": {
-        "issues": "https://github.com/laravel-zero/laravel-zero/issues",
-        "source": "https://github.com/laravel-zero/laravel-zero"
+        "issues": "https://github.com/ryangjchandler/forge-previewer/issues",
+        "source": "https://github.com/ryangjchandler/forge-previewer"
     },
     "authors": [
         {
-            "name": "Nuno Maduro",
-            "email": "enunomaduro@gmail.com"
+            "name": "Ryan Chandler",
+            "email": "support@ryangjchandler.co.uk"
         }
     ],
     "require": {
