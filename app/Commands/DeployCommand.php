@@ -58,7 +58,7 @@ class DeployCommand extends Command
             $envSource = $forge->siteEnvironmentFile($server->id, $site->id);
 
             foreach ($this->option('edit-env') as $env) {
-                [$key, $value] = explode(':', $env, 1);
+                [$key, $value] = explode(':', $env, 2);
 
                 $envSource = $this->updateEnvVariable($key, $value, $envSource);
             }
