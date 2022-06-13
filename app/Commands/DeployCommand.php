@@ -17,16 +17,16 @@ class DeployCommand extends Command
     use InteractsWithEnv;
 
     protected $signature = 'deploy
-        {--T|token=  : The Forge API token.}
-        {--S|server= : The ID of the target server.}
-        {--G|provider=github : The Git provider.}
-        {--R|repo= : The name of the repository being deployed.}
-        {--B|branch= : The name of the branch being deployed.}
-        {--D|domain= : The domain you\'d like to use for deployments.}
-        {--P|php-version=php81 : The version of PHP the site should use, e.g. php81, php80, ...}
-        {--C|command=* : A command you would like to execute on the site, e.g. php artisan db:seed.}
-        {--N|no-quick-deploy : Create your site without "Quick Deploy".}
-        {--O|no-deploy : Avoid deploying the site.}';
+        {--token=  : The Forge API token.}
+        {--server= : The ID of the target server.}
+        {--provider=github : The Git provider.}
+        {--repo= : The name of the repository being deployed.}
+        {--branch= : The name of the branch being deployed.}
+        {--domain= : The domain you\'d like to use for deployments.}
+        {--php-version=php81 : The version of PHP the site should use, e.g. php81, php80, ...}
+        {--command=* : A command you would like to execute on the site, e.g. php artisan db:seed.}
+        {--no-quick-deploy : Create your site without "Quick Deploy".}
+        {--no-deploy : Avoid deploying the site.}';
 
     protected $description = 'Deploy a branch / pull request to Laravel Forge.';
 
