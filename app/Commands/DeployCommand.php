@@ -32,7 +32,9 @@ class DeployCommand extends Command
         {--edit-env=* : The colon-separated name and value that will be added/updated in the site\'s environment, e.g. "MY_API_KEY:my_api_key_value".}
         {--scheduler : Setup a cronjob to run Laravel\'s scheduler.}
         {--no-quick-deploy : Create your site without "Quick Deploy".}
-        {--no-deploy : Avoid deploying the site.}';
+        {--no-deploy : Avoid deploying the site.}
+        {--no-isolation : Avoid site isolation.}
+        {--no-database : Avoid creating a database.}';
 
     protected $description = 'Deploy a branch / pull request to Laravel Forge.';
 
@@ -50,7 +52,9 @@ class DeployCommand extends Command
 
         $site = $this->findOrCreateSite($server);
 
-        $this->maybeCreateDatabase($server, $site);
+        if (!$this->option('no-database')) {
+            $this->maybeCreateDatabase($server, $site);
+        }
 
         if ($this->option('edit-env')) {
             $this->information('Updating environment variables');
