@@ -32,7 +32,6 @@ class DeployCommand extends Command
         {--edit-env=* : The colon-separated name and value that will be added/updated in the site\'s environment, e.g. "MY_API_KEY:my_api_key_value".}
         {--scheduler : Setup a cronjob to run Laravel\'s scheduler.}
         {--ci : Add additional output for your CI provider.}
-        {--ci-prefix=FORGE_PREVIWER : Add additional output for your CI provider.}
         {--no-quick-deploy : Create your site without "Quick Deploy".}
         {--no-deploy : Avoid deploying the site.}';
 
@@ -163,11 +162,9 @@ class DeployCommand extends Command
 
     protected function maybeOutput(string $key, string $value): void
     {
-        $prefix = $this->option('ci-prefix');
-
         if ($this->option('ci')) {
             // @TODO: Support different providers, (currently outputing in GitHub format)
-            $this->line("::set-output name={$prefix}_{$key}::$value");
+            $this->line("::set-output name=FORGE_PREVIWER_{$key}::$value");
         }
     }
 
