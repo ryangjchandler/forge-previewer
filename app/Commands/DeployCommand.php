@@ -164,7 +164,7 @@ class DeployCommand extends Command
     {
         if ($this->option('ci')) {
             // @TODO: Support different providers, (currently outputing in GitHub format)
-            $this->line("::set-output name=FORGE_PREVIWER_{$key}::$value");
+            $this->line("::set-output name=forge_previwer_{$key}::$value");
         }
     }
 
@@ -173,7 +173,7 @@ class DeployCommand extends Command
         $sites = $this->forge->sites($server->id);
         $domain = $this->generateSiteDomain();
 
-        $this->maybeOutput('DOMAIN', $domain);
+        $this->maybeOutput('domain', $domain);
 
         foreach ($sites as $site) {
             if ($site->name === $domain) {
