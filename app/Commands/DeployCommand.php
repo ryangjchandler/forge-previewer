@@ -31,6 +31,7 @@ class DeployCommand extends Command
         {--command=* : A command you would like to execute on the site, e.g. php artisan db:seed.}
         {--edit-env=* : The colon-separated name and value that will be added/updated in the site\'s environment, e.g. "MY_API_KEY:my_api_key_value".}
         {--scheduler : Setup a cronjob to run Laravel\'s scheduler.}
+        {--isolate : Enable site isolation.}
         {--ci : Add additional output for your CI provider.}
         {--no-quick-deploy : Create your site without "Quick Deploy".}
         {--no-deploy : Avoid deploying the site.}';
@@ -185,12 +186,21 @@ class DeployCommand extends Command
 
         $this->information('Creating site with domain ' . $domain);
 
-        $site = $this->forge->createSite($server->id, [
+        $data = [
             'domain' => $domain,
             'project_type' => 'php',
             'php_version' => $this->option('php-version'),
             'directory' => '/public'
-        ]);
+        ];
+
+        if ($this->option('isolate')) {
+            $this->information('Enabling site isolation');
+
+            $data['isolation'] = true;
+            $data['username'] = str($this->getBranchName())->slug();
+        }
+
+        $site = $this->forge->createSite($server->id, $data);
 
         $this->information('Installing Git repository');
 
