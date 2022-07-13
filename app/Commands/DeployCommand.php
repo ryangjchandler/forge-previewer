@@ -34,7 +34,8 @@ class DeployCommand extends Command
         {--isolate : Enable site isolation.}
         {--ci : Add additional output for your CI provider.}
         {--no-quick-deploy : Create your site without "Quick Deploy".}
-        {--no-deploy : Avoid deploying the site.}';
+        {--no-deploy : Avoid deploying the site.}
+        {--no-db : Avoid creating a database.}';
 
     protected $description = 'Deploy a branch / pull request to Laravel Forge.';
 
@@ -52,7 +53,9 @@ class DeployCommand extends Command
 
         $site = $this->findOrCreateSite($server);
 
-        $this->maybeCreateDatabase($server, $site);
+        if (! $this->option('no-db')) {
+            $this->maybeCreateDatabase($server, $site);
+        }
 
         if ($this->option('edit-env')) {
             $this->information('Updating environment variables');
