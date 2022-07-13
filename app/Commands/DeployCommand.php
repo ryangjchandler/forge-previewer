@@ -33,7 +33,7 @@ class DeployCommand extends Command
         {--scheduler : Setup a cronjob to run Laravel\'s scheduler.}
         {--no-quick-deploy : Create your site without "Quick Deploy".}
         {--no-deploy : Avoid deploying the site.}
-        {--no-database : Avoid creating a database.}';
+        {--no-db : Avoid creating a database.}';
 
     protected $description = 'Deploy a branch / pull request to Laravel Forge.';
 
