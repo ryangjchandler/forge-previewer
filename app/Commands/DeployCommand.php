@@ -182,7 +182,7 @@ class DeployCommand extends Command
             'directory' => '/public'
         ];
 
-        if ($this->option('site-isolation')) {
+        if ($this->option('isolate')) {
             $this->information('Enabling site isolation');
 
             $data['isolation'] = true;
