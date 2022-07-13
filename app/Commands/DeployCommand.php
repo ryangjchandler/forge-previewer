@@ -164,7 +164,7 @@ class DeployCommand extends Command
     {
         if ($this->option('ci')) {
             // @TODO: Support different providers, (currently outputing in GitHub format)
-            $this->line("::set-output name=forge_previwer_{$key}::$value");
+            $this->line("::set-output name=forge_previewer_{$key}::$value");
         }
     }
 
