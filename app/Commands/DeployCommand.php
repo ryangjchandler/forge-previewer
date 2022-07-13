@@ -31,7 +31,7 @@ class DeployCommand extends Command
         {--command=* : A command you would like to execute on the site, e.g. php artisan db:seed.}
         {--edit-env=* : The colon-separated name and value that will be added/updated in the site\'s environment, e.g. "MY_API_KEY:my_api_key_value".}
         {--scheduler : Setup a cronjob to run Laravel\'s scheduler.}
-        {--site-isolation : Enable site isolation.}
+        {--isolate : Enable site isolation.}
         {--no-quick-deploy : Create your site without "Quick Deploy".}
         {--no-deploy : Avoid deploying the site.}';
 
