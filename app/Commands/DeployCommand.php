@@ -32,6 +32,7 @@ class DeployCommand extends Command
         {--edit-env=* : The colon-separated name and value that will be added/updated in the site\'s environment, e.g. "MY_API_KEY:my_api_key_value".}
         {--scheduler : Setup a cronjob to run Laravel\'s scheduler.}
         {--isolate : Enable site isolation.}
+        {--ci : Add additional output for your CI provider.}
         {--no-quick-deploy : Create your site without "Quick Deploy".}
         {--no-deploy : Avoid deploying the site.}';
 
@@ -160,10 +161,20 @@ class DeployCommand extends Command
         $this->forge->updateSiteEnvironmentFile($server->id, $site->id, $env);
     }
 
+    protected function maybeOutput(string $key, string $value): void
+    {
+        if ($this->option('ci')) {
+            // @TODO: Support different providers, (currently outputing in GitHub format)
+            $this->line("::set-output name=forge_previewer_{$key}::$value");
+        }
+    }
+
     protected function findOrCreateSite(Server $server): Site
     {
         $sites = $this->forge->sites($server->id);
         $domain = $this->generateSiteDomain();
+
+        $this->maybeOutput('domain', $domain);
 
         foreach ($sites as $site) {
             if ($site->name === $domain) {
