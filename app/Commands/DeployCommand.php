@@ -51,7 +51,7 @@ class DeployCommand extends Command
 
         $site = $this->findOrCreateSite($server);
 
-        if (!$this->option('no-database')) {
+        if (! $this->option('no-db')) {
             $this->maybeCreateDatabase($server, $site);
         }
 
