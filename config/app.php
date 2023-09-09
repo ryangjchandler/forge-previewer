@@ -57,4 +57,33 @@ return [
         App\Providers\AppServiceProvider::class,
     ],
 
+    'token' => env('FORGE_TOKEN'),
+
+    'server' => env('FORGE_SERVER'),
+
+    'repo' => env('FORGE_REPO'),
+
+    'branch' => env('FORGE_BRANCH'),
+
+    'domain' => env('FORGE_DOMAIN'),
+
+    'provider' => env('PREVIEWER_PROVIDER', 'github'),
+
+    'php-version' => env('PREVIEWER_PHP_VERSION', 'php81'),
+
+    'command' => env('PREVIEWER_COMMAND'),
+
+    'edit-env' => env('PREVIEWER_EDIT_ENV'),
+
+    'scheduler' => env('PREVIEWER_SCHEDULER', false),
+
+    'isolate' => env('PREVIEWER_ISOLATE', false),
+
+    'ci' => env('PREVIEWER_CI', false),
+
+    'no-quick-deploy' => env('PREVIEWER_NO_QUICK_DEPLOY', false),
+
+    'no-deploy' => env('PREVIEWER_NO_DEPLOY', false),
+
+    'no-db' => env('PREVIEWER_NO_DB', false),
 ];

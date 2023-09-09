@@ -2,21 +2,20 @@
 
 namespace App\Commands;
 
+use App\Commands\Concerns\DestroyConfiguration;
 use Exception;
 use Laravel\Forge\Forge;
 use App\Commands\Concerns\HandlesOutput;
-use App\Commands\Concerns\InteractsWithEnv;
-use Illuminate\Console\Scheduling\Schedule;
 use LaravelZero\Framework\Commands\Command;
 use App\Commands\Concerns\GeneratesSiteInfo;
 use App\Commands\Concerns\GeneratesDatabaseInfo;
 use Laravel\Forge\Resources\Server;
 use Laravel\Forge\Resources\Site;
+use Throwable;
 
 class DestroyCommand extends Command
 {
     use HandlesOutput;
-    use InteractsWithEnv;
     use GeneratesDatabaseInfo;
     use GeneratesSiteInfo;
 
@@ -31,17 +30,23 @@ class DestroyCommand extends Command
 
     protected Forge $forge;
 
+    protected DestroyConfiguration $config;
+
     public function handle(Forge $forge)
     {
-        $this->forge = $forge->setApiKey($this->getForgeToken());
+        $this->resolveConfiguration();
+
+        $this->forge = $forge->setApiKey($this->config->forgeToken);
 
         try {
-            $server = $forge->server($this->getForgeServer());
+            $server = $forge->server($this->config->forgeServer);
         } catch (Exception $_) {
             return $this->fail("Failed to find server.");
         }
 
-        $site = $this->findSite($server);
+        $generatedSiteDomain = $this->generateSiteDomain($this->config->branchName, $this->config->domainName);
+
+        $site = $this->findSite($server, $generatedSiteDomain);
 
         if (! $site) {
             return $this->fail('Failed to find site.');
@@ -50,28 +55,28 @@ class DestroyCommand extends Command
         $this->information('Found site.');
 
         foreach ($forge->certificates($server->id, $site->id) as $certificate) {
-            if ($certificate->domain === $this->generateSiteDomain()) {
+            if ($certificate->domain === $generatedSiteDomain) {
                 $this->information('Deleting SSL certificate.');
                 $certificate->delete();
             }
         }
 
         foreach ($forge->jobs($server->id) as $job) {
-            if ($job->command === sprintf("php /home/forge/%s/artisan schedule:run", $this->generateSiteDomain())) {
+            if ($job->command === sprintf("php /home/forge/%s/artisan schedule:run", $generatedSiteDomain)) {
                 $this->information('Removing scheduled command.');
                 $job->delete();
             }
         }
 
         foreach ($forge->databases($server->id) as $database) {
-            if ($database->name === $this->getDatabaseName()) {
+            if ($database->name === $this->getDatabaseName($this->config->branchName)) {
                 $this->information('Removing database.');
                 $database->delete();
             }
         }
 
         foreach ($forge->databaseUsers($server->id) as $databaseUser) {
-            if ($databaseUser->name === $this->getDatabaseUserName()) {
+            if ($databaseUser->name === $this->getDatabaseUserName($this->config->branchName)) {
                 $this->information('Removing database user.');
                 $database->delete();
             }
@@ -84,10 +89,9 @@ class DestroyCommand extends Command
         $this->success('All done!');
     }
 
-    protected function findSite(Server $server): ?Site
+    protected function findSite(Server $server, string $domain): ?Site
     {
         $sites = $this->forge->sites($server->id);
-        $domain = $this->generateSiteDomain();
 
         foreach ($sites as $site) {
             if ($site->name === $domain) {
@@ -96,5 +100,14 @@ class DestroyCommand extends Command
         }
 
         return null;
+    }
+
+    protected function resolveConfiguration(): void
+    {
+        try {
+            $this->config = new DestroyConfiguration($this->options());
+        } catch (Throwable $throwable) {
+            $this->error($throwable->getMessage());
+        }
     }
 }

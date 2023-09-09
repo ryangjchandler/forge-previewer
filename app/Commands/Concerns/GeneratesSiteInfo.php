@@ -4,8 +4,8 @@ namespace App\Commands\Concerns;
 
 trait GeneratesSiteInfo
 {
-    protected function generateSiteDomain(): string
+    protected function generateSiteDomain(string $branchName, string $domainName): string
     {
-        return str($this->getBranchName())->slug()->append('.', $this->getDomainName())->toString();
+        return str($branchName)->slug()->append('.', $domainName)->toString();
     }
 }
