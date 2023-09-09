@@ -8,11 +8,6 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 final class DeployConfiguration extends ConfigurationAbstract
 {
-    public ?string $forgeToken;
-    public ?string $forgeServer;
-    public ?string $repositoryName;
-    public ?string $branchName;
-    public ?string $domainName;
     public ?string $providerName;
     public ?string $phpVersion;
     public ?array $commands;

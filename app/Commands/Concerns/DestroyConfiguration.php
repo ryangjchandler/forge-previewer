@@ -8,12 +8,6 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 final class DestroyConfiguration extends ConfigurationAbstract
 {
-    public ?string $forgeToken;
-    public ?string $forgeServer;
-    public ?string $repositoryName;
-    public ?string $branchName;
-    public ?string $domainName;
-
     protected function configureOptions(array $options = []): void
     {
         $resolver = new OptionsResolver();
