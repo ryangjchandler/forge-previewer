@@ -41,7 +41,7 @@ class DeployCommand extends Command
     protected Forge $forge;
     protected DeployConfiguration $config;
 
-    public function handle(Forge $forge): void
+    public function handle(Forge $forge)
     {
         $this->resolveConfiguration();
 
@@ -50,8 +50,7 @@ class DeployCommand extends Command
         try {
             $server = $forge->server($this->config->forgeServer);
         } catch (Exception $_) {
-            $this->fail("Failed to find server.");
-            return;
+            return $this->fail("Failed to find server.");
         }
 
         $site = $this->findOrCreateSite($server);
