@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\Commands\Concerns;
 
-use Illuminate\Support\Arr;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-final class DeployConfiguration
+final class DeployConfiguration extends ConfigurationAbstract
 {
     public ?string $forgeToken;
     public ?string $forgeServer;
@@ -24,11 +23,6 @@ final class DeployConfiguration
     public bool $quickDeployRequired;
     public bool $deployRequired;
     public bool $databaseRequired;
-
-    public function __construct(array $options = [])
-    {
-        $this->configureOptions($options);
-    }
 
     protected function configureOptions(array $options = []): void
     {
@@ -53,7 +47,7 @@ final class DeployConfiguration
         ]);
 
         $config = $resolver->resolve(
-            Arr::only($options, DeployProps::toArray())
+            $this->getFilledOptions($options, DeployProps::toArray())
         );
 
         // Initialize the properties...

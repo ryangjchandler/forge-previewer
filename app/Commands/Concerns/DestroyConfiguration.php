@@ -4,21 +4,15 @@ declare(strict_types=1);
 
 namespace App\Commands\Concerns;
 
-use Illuminate\Support\Arr;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-final class DestroyConfiguration
+final class DestroyConfiguration extends ConfigurationAbstract
 {
     public ?string $forgeToken;
     public ?string $forgeServer;
     public ?string $repositoryName;
     public ?string $branchName;
     public ?string $domainName;
-
-    public function __construct(array $options = [])
-    {
-        $this->configureOptions($options);
-    }
 
     protected function configureOptions(array $options = []): void
     {
@@ -33,7 +27,7 @@ final class DestroyConfiguration
         ]);
 
         $config = $resolver->resolve(
-            Arr::only($options, DestroyProps::toArray())
+            $this->getFilledOptions($options, DestroyProps::toArray())
         );
 
         // Initialize the properties...
