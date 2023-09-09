@@ -6,9 +6,9 @@ use Illuminate\Support\Str;
 
 trait GeneratesDatabaseInfo
 {
-    protected function getDatabaseUserName(): string
+    protected function getDatabaseUserName(string $branchName): string
     {
-        return $this->getDatabaseName();
+        return $this->getDatabaseName($branchName);
     }
 
     protected function getDatabasePassword(): string
@@ -18,8 +18,8 @@ trait GeneratesDatabaseInfo
         return $password ??= Str::random(16);
     }
 
-    protected function getDatabaseName(): string
+    protected function getDatabaseName(string $branchName): string
     {
-        return str($this->getBranchName())->slug('_')->limit(64)->toString();
+        return str($branchName)->slug('_')->limit(64)->toString();
     }
 }

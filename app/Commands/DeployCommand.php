@@ -2,21 +2,20 @@
 
 namespace App\Commands;
 
+use App\Commands\Concerns\DeployConfiguration;
 use App\Commands\Concerns\GeneratesDatabaseInfo;
 use App\Commands\Concerns\GeneratesSiteInfo;
 use Exception;
 use Laravel\Forge\Forge;
-use Illuminate\Support\Str;
 use Laravel\Forge\Resources\Site;
 use Laravel\Forge\Resources\Server;
 use App\Commands\Concerns\HandlesOutput;
-use App\Commands\Concerns\InteractsWithEnv;
 use LaravelZero\Framework\Commands\Command;
+use Throwable;
 
 class DeployCommand extends Command
 {
     use HandlesOutput;
-    use InteractsWithEnv;
     use GeneratesSiteInfo;
     use GeneratesDatabaseInfo;
 
@@ -40,29 +39,33 @@ class DeployCommand extends Command
     protected $description = 'Deploy a branch / pull request to Laravel Forge.';
 
     protected Forge $forge;
+    protected DeployConfiguration $config;
 
-    public function handle(Forge $forge)
+    public function handle(Forge $forge): void
     {
-        $this->forge = $forge->setApiKey($this->getForgeToken());
+        $this->resolveConfiguration();
+
+        $this->forge = $forge->setApiKey($this->config->forgeToken);
 
         try {
-            $server = $forge->server($this->getForgeServer());
+            $server = $forge->server($this->config->forgeServer);
         } catch (Exception $_) {
-            return $this->fail("Failed to find server.");
+            $this->fail("Failed to find server.");
+            return;
         }
 
         $site = $this->findOrCreateSite($server);
 
-        if (! $this->option('no-db')) {
+        if ($this->config->databaseRequired) {
             $this->maybeCreateDatabase($server, $site);
         }
 
-        if ($this->option('edit-env')) {
+        if ($this->config->environmentKeys) {
             $this->information('Updating environment variables');
 
             $envSource = $forge->siteEnvironmentFile($server->id, $site->id);
 
-            foreach ($this->option('edit-env') as $env) {
+            foreach ($this->config->environmentKeys as $env) {
                 [$key, $value] = explode(':', $env, 2);
 
                 $envSource = $this->updateEnvVariable($key, $value, $envSource);
@@ -75,7 +78,7 @@ class DeployCommand extends Command
 
         $site->deploySite();
 
-        foreach ($this->option('command') as $i => $command) {
+        foreach ($this->config->commands as $i => $command) {
             if ($i === 0) {
                 $this->information('Executing site command(s)');
             }
@@ -101,7 +104,7 @@ class DeployCommand extends Command
 
     protected function maybeCreateScheduledJob(Server $server)
     {
-        if (! $this->option('scheduler')) {
+        if ($this->config->schedulerRequired) {
             return;
         }
 
@@ -125,12 +128,12 @@ class DeployCommand extends Command
 
     protected function buildScheduledJobCommand(): string
     {
-        return sprintf("php /home/forge/%s/artisan schedule:run", $this->generateSiteDomain());
+        return sprintf("php /home/forge/%s/artisan schedule:run", $this->generateSiteDomain($this->config->branchName, $this->config->domainName));
     }
 
     protected function maybeCreateDatabase(Server $server, Site $site)
     {
-        $name = $this->getDatabaseName();
+        $name = $this->getDatabaseName($this->config->branchName);
 
         foreach ($this->forge->databases($server->id) as $database) {
             if ($database->name === $name) {
@@ -143,8 +146,8 @@ class DeployCommand extends Command
         $this->information('Creating database');
 
         $this->forge->createDatabase($server->id, [
-            'name' => $this->getDatabaseName(),
-            'user' => $this->getDatabaseUserName(),
+            'name' => $this->getDatabaseName($this->config->branchName),
+            'user' => $this->getDatabaseUserName($this->config->branchName),
             'password' => $this->getDatabasePassword(),
         ]);
 
@@ -156,8 +159,8 @@ class DeployCommand extends Command
             "/DB_USERNAME=.*/",
             "/DB_PASSWORD=.*/",
         ], [
-            "DB_DATABASE={$this->getDatabaseName()}",
-            "DB_USERNAME={$this->getDatabaseUserName()}",
+            "DB_DATABASE={$this->getDatabaseName($this->config->branchName)}",
+            "DB_USERNAME={$this->getDatabaseUserName($this->config->branchName)}",
             "DB_PASSWORD={$this->getDatabasePassword()}"
         ], $env);
 
@@ -166,7 +169,7 @@ class DeployCommand extends Command
 
     protected function maybeOutput(string $key, string $value): void
     {
-        if ($this->option('ci')) {
+        if ($this->config->ciOutputRequired) {
             // @TODO: Support different providers, (currently outputing in GitHub format)
             $this->line("::set-output name=forge_previewer_{$key}::$value");
         }
@@ -175,7 +178,7 @@ class DeployCommand extends Command
     protected function findOrCreateSite(Server $server): Site
     {
         $sites = $this->forge->sites($server->id);
-        $domain = $this->generateSiteDomain();
+        $domain = $this->generateSiteDomain($this->config->branchName, $this->config->domainName);
 
         $this->maybeOutput('domain', $domain);
 
@@ -192,15 +195,15 @@ class DeployCommand extends Command
         $data = [
             'domain' => $domain,
             'project_type' => 'php',
-            'php_version' => $this->option('php-version'),
+            'php_version' => $this->config->phpVersion,
             'directory' => '/public'
         ];
 
-        if ($this->option('isolate')) {
+        if ($this->config->isolateRequired) {
             $this->information('Enabling site isolation');
 
             $data['isolation'] = true;
-            $data['username'] = str($this->getBranchName())->slug();
+            $data['username'] = str($this->config->branchName)->slug();
         }
 
         $site = $this->forge->createSite($server->id, $data);
@@ -208,13 +211,13 @@ class DeployCommand extends Command
         $this->information('Installing Git repository');
 
         $site->installGitRepository([
-            'provider' => $this->option('provider'),
-            'repository' => $this->getRepoName(),
-            'branch' => $this->getBranchName(),
+            'provider' => $this->config->providerName,
+            'repository' => $this->config->repositoryName,
+            'branch' => $this->config->branchName,
             'composer' => true,
         ]);
 
-        if (! $this->option('no-quick-deploy')) {
+        if ($this->config->quickDeployRequired) {
             $this->information('Enabling quick deploy');
 
             $site->enableQuickDeploy();
@@ -223,9 +226,18 @@ class DeployCommand extends Command
         $this->information('Generating SSL certificate');
 
         $this->forge->obtainLetsEncryptCertificate($server->id, $site->id, [
-            'domains' => [$this->generateSiteDomain()],
+            'domains' => [$this->generateSiteDomain($this->config->branchName, $this->config->domainName)],
         ]);
 
         return $site;
+    }
+
+    protected function resolveConfiguration(): void
+    {
+        try {
+            $this->config = new DeployConfiguration($this->options());
+        } catch (Throwable $throwable) {
+            $this->error($throwable->getMessage());
+        }
     }
 }
