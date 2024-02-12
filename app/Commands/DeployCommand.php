@@ -71,9 +71,11 @@ class DeployCommand extends Command
             $forge->updateSiteEnvironmentFile($server->id, $site->id, $envSource);
         }
 
-        $this->information('Deploying');
+        if (! $this->option('no-deploy')) {
+            $this->information('Deploying');
 
-        $site->deploySite();
+            $site->deploySite();
+        }
 
         foreach ($this->option('command') as $i => $command) {
             if ($i === 0) {
