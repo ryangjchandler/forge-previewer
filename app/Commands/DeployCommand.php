@@ -35,7 +35,8 @@ class DeployCommand extends Command
         {--ci : Add additional output for your CI provider.}
         {--no-quick-deploy : Create your site without "Quick Deploy".}
         {--no-deploy : Avoid deploying the site.}
-        {--no-db : Avoid creating a database.}';
+        {--no-db : Avoid creating a database.}
+        {--timeout= : Set the timeout (in seconds) used for Forge API requests, defaults to 30 seconds.}';
 
     protected $description = 'Deploy a branch / pull request to Laravel Forge.';
 
@@ -44,6 +45,10 @@ class DeployCommand extends Command
     public function handle(Forge $forge)
     {
         $this->forge = $forge->setApiKey($this->getForgeToken());
+
+        if ($timeout = $this->option('timeout')) {
+            $this->forge->setTimeout($timeout);
+        }
 
         try {
             $server = $forge->server($this->getForgeServer());

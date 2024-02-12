@@ -15,8 +15,8 @@
         }
     ],
     "require": {
-        "php": "^8.0",
-        "laravel-zero/framework": "^9.0",
+        "php": "^8.1",
+        "laravel-zero/framework": "^10.0",
         "laravel/forge-sdk": "^3.13",
         "nunomaduro/termwind": "^1.3"
     },
